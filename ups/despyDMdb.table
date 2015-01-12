@@ -1,0 +1,4 @@
+envPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)
+
+#setupRequired(despydb)
+#setupRequired(despymisc)
