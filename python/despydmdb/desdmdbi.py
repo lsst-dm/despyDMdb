@@ -233,6 +233,62 @@ class DesDmDbi (desdbi.DesDbi):
         return info
 
 
+    def load_artifact_gtt(self, filelist):
+        """ insert file artifact information into global temp table """
+        # filelist is list of file dictionaries
+        # returns artifact GTT table name
+
+        parsemask = miscutils.CU_PARSE_FILENAME | miscutils.CU_PARSE_EXTENSION
+
+        # make sure table is empty before loading it
+        self.empty_gtt(dmdbdefs.DB_GTT_ARTIFACT)
+        
+        colmap = [dmdbdefs.DB_COL_FILENAME, dmdbdefs.DB_COL_COMPRESSION,
+                  dmdbdefs.DB_COL_MD5SUM, dmdbdefs.DB_COL_FILESIZE]
+        rows = []
+        for file in filelist:
+            miscutils.fwdebug(3, 'DESDBI_DEBUG', "file = %s" % file) 
+            fname = None
+            comp = None
+            md5sum = None
+            filesize = None
+            if (dmdbdefs.DB_COL_FILENAME in file or dmdbdefs.DB_COL_FILENAME.lower() in file):
+                if dmdbdefs.DB_COL_COMPRESSION in file:
+                    fname = file[dmdbdefs.DB_COL_FILENAME]
+                    comp = file[dmdbdefs.DB_COL_COMPRESSION]
+                elif dmdbdefs.DB_COL_COMPRESSION.lower() in file:
+                    fname = file[dmdbdefs.DB_COL_FILENAME.lower()]
+                    comp = file[dmdbdefs.DB_COL_COMPRESSION.lower()]
+                elif dmdbdefs.DB_COL_FILENAME in file:
+                    (fname,comp) = miscutils.parse_fullname(file[dmdbdefs.DB_COL_FILENAME], parsemask)
+                else:
+                    (fname,comp) = miscutils.parse_fullname(file[dmdbdefs.DB_COL_FILENAME.lower()], parsemask)
+                miscutils.fwdebug(3, 'DESDBI_DEBUG', "fname=%s, comp=%s"  % (fname,comp)) 
+            elif 'fullname' in file:
+                (fname,comp) = miscutils.parse_fullname(file['fullname'], parsemask)
+                miscutils.fwdebug(3, 'DESDBI_DEBUG', "parse_fullname: fname=%s, comp=%s"  % (fname,comp)) 
+            else:
+                miscutils.fwdebug(3, 'DESDBI_DEBUG', "file=%s"  % (file)) 
+                raise ValueError("Invalid entry filelist (%s)" % file)
+
+            if dmdbdefs.DB_COL_FILESIZE in file:
+                filesize = file[dmdbdefs.DB_COL_FILESIZE]
+            elif dmdbdefs.DB_COL_FILESIZE.lower() in file:
+                filesize = file[dmdbdefs.DB_COL_FILESIZE.lower()]
+
+            if dmdbdefs.DB_COL_MD5SUM in file:
+                md5sum = file[dmdbdefs.DB_COL_MD5SUM]
+            elif dmdbdefs.DB_COL_MD5SUM.lower() in file:
+                md5sum = file[dmdbdefs.DB_COL_MD5SUM.lower()]
+
+            miscutils.fwdebug(3, 'DESDBI_DEBUG', "row: fname=%s, comp=%s, filesize=%s, md5sum=%s"  % (fname,comp,filesize,md5sum)) 
+            rows.append({dmdbdefs.DB_COL_FILENAME:fname,dmdbdefs.DB_COL_COMPRESSION:comp,
+                         dmdbdefs.DB_COL_FILESIZE:filesize, dmdbdefs.DB_COL_MD5SUM:md5sum})
+
+        self.insert_many(dmdbdefs.DB_GTT_ARTIFACT,colmap,rows)
+        return dmdbdefs.DB_GTT_ARTIFACT
+
+
     def load_filename_gtt(self, filelist):
         """ insert filenames into filename global temp table to use in join for later query """
         # returns filename GTT table name
