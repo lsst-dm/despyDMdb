@@ -98,45 +98,46 @@ class DesDmDbi (desdbi.DesDbi):
         data from the OPS_METADATA, OPS_FILETYPE, and OPS_FILETYPE_METADATA tables.
         This is intended to provide a complete set of filetype metadata required
         during a run.
-        Note that the returned dictionary is nested based on the order of the
-        columns in the select clause.  Values in columns contained in the
-        "collections" list will be turned into dictionaries keyed by the value,
-        while the remaining columns will become "column_name=value" elements
-        of the parent dictionary.  Thus the sql query and collections list can be
-        altered without changing the rest of the code.
-        Note that the code expects file_header_name, position, and column_name
-        to be the final three columns in the select list. Those should not be altered.
         """
-        sql = """select f.filetype,f.metadata_table,nvl(fm.file_hdu,'PRIMARY') file_hdu,
-                    fm.status,fm.derived,fm.file_header_name,m.position,m.column_name
+        sql = """select f.filetype, f.metadata_table, f.filetype_mgmt,
+                    nvl(fm.file_hdu, 'primary') file_hdu,
+                    fm.status, fm.derived,
+                    fm.file_header_name, m.column_name
                 from OPS_METADATA m, OPS_FILETYPE f, OPS_FILETYPE_METADATA fm
                 where m.file_header_name=fm.file_header_name
                     and f.filetype=fm.filetype
-                order by 1,2,3,4,5,6 """
-        collections = ['filetype','file_hdu','status','derived']
+                """
         curs = self.cursor()
         curs.execute(sql)
         desc = [d[0].lower() for d in curs.description]
-        result = OrderedDict()
 
+        result = OrderedDict()
         for row in curs:
+            info = dict(zip(desc, row))
             ptr = result
-            for col, value in enumerate(row):
-                normvalue = str(value).lower()
-                if col >= (len(row)-3):
-                    if normvalue not in ptr:
-                        ptr[normvalue] = str(row[col+2]).lower()
-                    else:
-                        ptr[normvalue] += "," + str(row[col+2]).lower()
-                    break
-                if normvalue not in ptr:
-                    if desc[col] in collections:
-                        ptr[normvalue] = OrderedDict()
-                    else:
-                        ptr[desc[col]] = normvalue
-                if desc[col] in collections:
-                    ptr = ptr[normvalue]
+            ftype = info['filetype'].lower()
+            if ftype not in result:
+                result[ftype] = OrderedDict({'hdus': OrderedDict()})
+                if info['metadata_table'] is not None:
+                    result[ftype]['metadata_table'] = info['metadata_table'].lower()
+                if info['filetype_mgmt'] is not None:
+                    result[ftype]['filetype_mgmt'] = info['filetype_mgmt']
+
+            if info['file_hdu'].lower() not in result[ftype]['hdus']:
+                result[ftype]['hdus'][info['file_hdu'].lower()] = OrderedDict()
+
+            ptr = result[ftype]['hdus'][info['file_hdu'].lower()]
+            if info['status'].lower() not in ptr:
+                ptr[info['status'].lower()] = OrderedDict()
+                    
+            ptr = ptr[info['status'].lower()]
+            if info['derived'].lower() not in ptr:
+                ptr[info['derived'].lower()] = OrderedDict()
+                    
+            ptr[info['derived'].lower()][info['file_header_name'].lower()] = info['column_name'].lower()
+
         curs.close()
+        
         return result
 
 
