@@ -28,6 +28,9 @@ class DesDmDbi (desdbi.DesDbi):
     Build on base DES db class adding DB functions used across various DM projects
     """
 
+    def __init__(self, desfile=None, section=None):
+        desdbi.DesDbi.__init__(self, desfile, section, retry=True)
+
     def exec_sql_expression (self, expression):
         """
         Execute an SQL expression or expressions.
@@ -106,6 +109,7 @@ class DesDmDbi (desdbi.DesDbi):
                 from OPS_METADATA m, OPS_FILETYPE f, OPS_FILETYPE_METADATA fm
                 where m.file_header_name=fm.file_header_name
                     and f.filetype=fm.filetype
+                    and fm.status != 'I'
                 """
         curs = self.cursor()
         curs.execute(sql)
@@ -430,6 +434,8 @@ class DesDmDbi (desdbi.DesDbi):
             else:
                 result[row[HDU]][row[ATTRIBUTE]]['columns'][row[POSITION]] = row[COLUMN]
         curs.close()
+        if tablename is None:
+            raise ValueError('Invalid filetype - missing entries in datafile tables')
         return [tablename,result]
 
 
