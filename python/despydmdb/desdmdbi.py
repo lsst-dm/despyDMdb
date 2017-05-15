@@ -325,6 +325,17 @@ class DesDmDbi (desdbi.DesDbi):
         self.insert_many(dmdbdefs.DB_GTT_FILENAME,colmap,rows)
         return dmdbdefs.DB_GTT_FILENAME
 
+    def load_id_gtt(self, idlist):
+        self.empty_gtt(dmdbdefs.DB_GTT_ID)
+        colmap = [dmdbdefs.DB_COL_ID]
+        rows = []
+        for desfid in idlist:
+            if isinstance(desfid, int):
+                rows.append({dmdbdefs.DB_COL_ID: desfid})
+            else:
+                raise ValueError("invalid entry idlist (%s)" % str(desfid))
+        self.insert_many(dmdbdefs.DB_GTT_ID, colmap, rows)
+        return dmdbdefs.DB_GTT_ID
 
     def empty_gtt(self, tablename):
         """ clean out temp table for when one wants separate commit/rollback control """
