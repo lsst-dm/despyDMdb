@@ -75,7 +75,7 @@ class DesDmDbi (desdbi.DesDbi):
 
         result = OrderedDict()
         for line in curs:
-            d = dict(zip(desc, line))
+            d = dict(list(zip(desc, line)))
             headername = d['file_header_name'].lower()
             columnname = d['column_name'].lower()
             if headername not in result:
@@ -110,7 +110,7 @@ class DesDmDbi (desdbi.DesDbi):
 
         result = OrderedDict()
         for row in curs:
-            info = dict(zip(desc, row))
+            info = dict(list(zip(desc, row)))
             ptr = result
             ftype = info['filetype'].lower()
             if ftype not in result:
@@ -298,7 +298,7 @@ class DesDmDbi (desdbi.DesDbi):
         for file in filelist:
             fname = None
             comp = None
-            if isinstance(file, basestring):
+            if isinstance(file, str):
                 (fname, comp) = miscutils.parse_fullname(
                     file, miscutils.CU_PARSE_FILENAME | miscutils.CU_PARSE_EXTENSION)
             elif isinstance(file, dict) and (dmdbdefs.DB_COL_FILENAME in file or dmdbdefs.DB_COL_FILENAME.lower() in file):
@@ -423,9 +423,9 @@ class DesDmDbi (desdbi.DesDbi):
         for row in curs:
             if tablename == None:
                 tablename = row[TABLE]
-            if row[HDU] not in result.keys():
+            if row[HDU] not in list(result.keys()):
                 result[row[HDU]] = {}
-            if row[ATTRIBUTE] not in result[row[HDU]].keys():
+            if row[ATTRIBUTE] not in list(result[row[HDU]].keys()):
                 result[row[HDU]][row[ATTRIBUTE]] = {}
                 result[row[HDU]][row[ATTRIBUTE]]['datatype'] = row[DATATYPE]
                 result[row[HDU]][row[ATTRIBUTE]]['format'] = row[FORMAT]
@@ -443,20 +443,20 @@ class DesDmDbi (desdbi.DesDbi):
 #### Embedded simple test
 if __name__ == '__main__':
     dbh = DesDmDbi()
-    print 'dbh = ', dbh
+    print('dbh = ', dbh)
     if dbh.is_postgres():
-        print 'Connected to postgres DB'
+        print('Connected to postgres DB')
     elif dbh.is_oracle():
-        print 'Connected to oracle DB'
-    print 'which_services_file = ', dbh.which_services_file()
-    print 'which_services_section = ', dbh.which_services_section()
+        print('Connected to oracle DB')
+    print('which_services_file = ', dbh.which_services_file())
+    print('which_services_section = ', dbh.which_services_section())
 
-    print dbh.get_column_names('exposure')
+    print(dbh.get_column_names('exposure'))
 
     cursor = dbh.cursor()
     cursor.execute('SELECT count(*) from exposure')
     row = cursor.fetchone()
-    print 'Number exposures:', row[0]
+    print('Number exposures:', row[0])
     cursor.close()
     #dbh.commit()
     dbh.close()
