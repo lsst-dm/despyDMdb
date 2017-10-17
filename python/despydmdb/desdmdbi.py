@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-# $Id$
-# $Rev::                                  $:  # Revision of last commit.
-# $LastChangedBy::                        $:  # Author of last commit.
-# $LastChangedDate::                      $:  # Date of last commit.
-
 """
 Higher-level DB functions used across multiple svn projects of DESDM
 Modified more often than the lower-level despydb
