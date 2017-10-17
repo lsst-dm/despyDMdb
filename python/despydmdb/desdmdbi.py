@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-"""
-Higher-level DB functions used across multiple svn projects of DESDM
+"""Higher-level DB functions used across multiple svn projects of DESDM.
+
 Modified more often than the lower-level despydb
 """
 
 __version__ = "$Rev$"
+
 
 import re
 import sys
@@ -20,16 +21,14 @@ import despymisc.miscutils as miscutils
 
 
 class DesDmDbi (desdbi.DesDbi):
-    """
-    Build on base DES db class adding DB functions used across various DM projects
+    """Adds DB functions used across various DM projects.
     """
 
     def __init__(self, desfile=None, section=None):
         desdbi.DesDbi.__init__(self, desfile, section, retry=True)
 
     def exec_sql_expression(self, expression):
-        """
-        Execute an SQL expression or expressions.
+        """Execute an SQL expression or expressions.
 
         Construct and execute an SQL statement from a string containing an SQL
         expression or a list of such strings.  Return a sequence containing a
@@ -48,8 +47,7 @@ class DesDmDbi (desdbi.DesDbi):
         return res
 
     def get_expr_exec_format(self):
-        """
-        Return a format string for a statement to execute SQL expressions.
+        """Return a format string for a statement to execute SQL expressions.
 
         The returned format string contains a single unnamed python subsitution
         string that expects a string containing the expressions to be executed.
@@ -89,11 +87,10 @@ class DesDmDbi (desdbi.DesDbi):
         return result
 
     def get_all_filetype_metadata(self):
-        """
+        """Provide a complete set of filetype metadata required during a run.
+
         Gets a dictionary of dictionaries or string=value pairs representing
         data from the OPS_METADATA, OPS_FILETYPE, and OPS_FILETYPE_METADATA tables.
-        This is intended to provide a complete set of filetype metadata required
-        during a run.
         """
         sql = """select f.filetype, f.metadata_table, f.filetype_mgmt,
                     nvl(fm.file_hdu, 'primary') file_hdu,
@@ -138,7 +135,8 @@ class DesDmDbi (desdbi.DesDbi):
         return result
 
     def get_site_info(self):
-        """ Return contents of ops_site and ops_site_val tables """
+        """Return contents of ops_site and ops_site_val tables.
+        """
         # assumes foreign key constraints so cannot have site in ops_site_val that isn't in ops_site
 
         site_info = self.query_results_dict('select * from ops_site', 'name')
@@ -151,7 +149,8 @@ class DesDmDbi (desdbi.DesDbi):
         return site_info
 
     def get_archive_info(self):
-        """ Return contents of ops_archive and ops_archive_val tables """
+        """Return contents of ops_archive and ops_archive_val tables.
+        """
         # assumes foreign key constraints so cannot have archive in ops_archive_val that isn't in ops_archive
 
         archive_info = self.query_results_dict('select * from ops_archive', 'name')
@@ -164,8 +163,8 @@ class DesDmDbi (desdbi.DesDbi):
         return archive_info
 
     def get_archive_transfer_info(self):
-        """ Return contents of ops_archive_transfer and ops_archive_transfer_val tables """
-
+        """Return contents of ops_archive_transfer and ops_archive_transfer_val tables.
+        """
         archive_transfer = OrderedDict()
         sql = "select src,dst,transfer from ops_archive_transfer"
         curs = self.cursor()
@@ -191,7 +190,8 @@ class DesDmDbi (desdbi.DesDbi):
         return archive_transfer
 
     def get_job_file_mvmt_info(self):
-        """ Return contents of ops_job_file_mvmt and ops_job_file_mvmt_val tables """
+        """Return contents of ops_job_file_mvmt and ops_job_file_mvmt_val tables.
+        """
         # [site][home][target][key] = [val]  where req key is mvmtclass
 
         sql = "select site,home_archive,target_archive,mvmtclass from ops_job_file_mvmt"
@@ -230,7 +230,8 @@ class DesDmDbi (desdbi.DesDbi):
         return info
 
     def load_artifact_gtt(self, filelist):
-        """ insert file artifact information into global temp table """
+        """Insert file artifact information into global temp table.
+        """
         # filelist is list of file dictionaries
         # returns artifact GTT table name
 
@@ -287,7 +288,10 @@ class DesDmDbi (desdbi.DesDbi):
         return dmdbdefs.DB_GTT_ARTIFACT
 
     def load_filename_gtt(self, filelist):
-        """ insert filenames into filename global temp table to use in join for later query """
+        """Insert filenames into filename global temp table.
+
+        To use in join for later query.
+        """
         # returns filename GTT table name
 
         # make sure table is empty before loading it
@@ -333,9 +337,9 @@ class DesDmDbi (desdbi.DesDbi):
         return dmdbdefs.DB_GTT_ID
 
     def empty_gtt(self, tablename):
-        """ clean out temp table for when one wants separate commit/rollback control """
+        """Clean out temp table if one wants separate commit/rollback control.
+        """
         # could be changed to generic empty table function, for now wanted safety check
-
         if 'gtt' not in tablename.lower():
             raise ValueError("Invalid table name for a global temp table (missing GTT)")
 
@@ -347,8 +351,8 @@ class DesDmDbi (desdbi.DesDbi):
     def create_task(self, name, info_table,
                     parent_task_id=None, root_task_id=None, i_am_root=False,
                     label=None, do_begin=False, do_commit=False):
-        """ insert a row into the task table and return task id """
-
+        """Insert a row into the task table and return task id.
+        """
         row = {'name': name, 'info_table': info_table}
 
         row['id'] = self.get_seq_next_value('task_seq') # get task id
@@ -375,8 +379,8 @@ class DesDmDbi (desdbi.DesDbi):
         return row['id']
 
     def begin_task(self, task_id, do_commit=False):
-        """ update a row in the task table with beginning of task info """
-
+        """Update a row in the task table with beginning of task info.
+        """
         updatevals = {'start_time': self.get_current_timestamp_str(),
                       'exec_host': socket.gethostname()}
         wherevals = {'id': task_id} # get task id
@@ -386,7 +390,8 @@ class DesDmDbi (desdbi.DesDbi):
             self.commit()
 
     def end_task(self, task_id, status, do_commit=False):
-        """ update a row in the task table with end of task info """
+        """Update a row in the task table with end of task info.
+        """
         wherevals = {}
         wherevals['id'] = task_id
 
@@ -399,8 +404,9 @@ class DesDmDbi (desdbi.DesDbi):
             self.commit()
 
     def get_datafile_metadata(self, filetype):
-        """ Gets a dictionary of all datafile (such as XML or fits table data files) metadata for the given filetype.
-            Returns a list: [target_table_name,metadata]
+        """Gets a dictionary of all datafile (such as XML or fits table data files) metadata for the given filetype.
+
+        Returns a list: [target_table_name,metadata]
         """
         TABLE = 0
         HDU = 1

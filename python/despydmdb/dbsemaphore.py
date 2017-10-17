@@ -1,25 +1,23 @@
 #!/usr/bin/env python
 
-"""
-    Using the database, provide semaphore capability.
+"""Using the database, provide semaphore capability.
 """
 
 __version__ = "$Rev$"
 
-import time
 
+import time
 import despymisc.miscutils as miscutils
 
 
 class DBSemaphore ():
-    """
-    Using the database, provide semaphore capability.
-    Currently requires Oracle
+    """Using the database, provide semaphore capability.
+
+    Currently requires Oracle.
     """
 
     def __init__(self, semname, task_id, desfile=None, section=None):
-        """
-        Create the DB connection and do the semaphore wait.
+        """Create the DB connection and do the semaphore wait.
         """
         self.desfile = desfile
         self.section = section
@@ -93,8 +91,7 @@ class DBSemaphore ():
             dbh2.commit()
 
     def __del__(self):
-        """ 
-        Do the semaphore signal and close DB connection
+        """Do the semaphore signal and close DB connection.
         """
         if self.slot != None:
             try:
@@ -113,8 +110,7 @@ class DBSemaphore ():
         self.dbh.close()
 
     def __str__(self):
-        """
-        x.__str__() <==> str(x)
+        """x.__str__() <==> str(x)
         """
         return str({'name': self.semname, 'slot': self.slot})
 
