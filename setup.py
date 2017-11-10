@@ -17,6 +17,6 @@ setup(name='despyDMdb',
       packages = ['despydmdb'],
       package_dir = {'': 'python'},
       #scripts = bin_files,
-      #data_files=[('ups',['ups/despyDMdb.table'])], # optional
+      data_files=[('ups',['ups/despyDMdb.table'])],
       )
 
