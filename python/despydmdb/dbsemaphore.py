@@ -3,8 +3,6 @@
 """Using the database, provide semaphore capability.
 """
 
-__version__ = "$Rev$"
-
 
 import time
 import despymisc.miscutils as miscutils

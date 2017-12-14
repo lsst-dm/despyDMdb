@@ -5,8 +5,6 @@
 Modified more often than the lower-level despydb
 """
 
-__version__ = "$Rev$"
-
 
 import re
 import sys
