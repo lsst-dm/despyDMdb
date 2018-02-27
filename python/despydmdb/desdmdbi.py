@@ -32,7 +32,7 @@ class DesDmDbi (desdbi.DesDbi):
         expression or a list of such strings.  Return a sequence containing a
         result for each column.
         """
-        if hasattr(expression, '__iter__'):
+        if isinstance(expression, list):
             s = ','.join(expression)
         else:
             s = expression
