@@ -1,3 +1,3 @@
+"""Common DESDM DB classes/functions.
 """
-common DESDM DB classes/functions
-"""
+
